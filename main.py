@@ -31,12 +31,12 @@ def signal_handler(sig, frame):
 @click.command("kafka-consumer")
 @click.option("-c", "--consumer-type", type=click.Choice(['basic', 'commit']),
               help="Type of Kafka consumer to run")
+@click.option("-b", "--batch-size", type=int, default=1, help="[Only valid with -c commit] How many messages to process before committing.")
 @click.option("-g", "--consumer-group", help="Name of the consumer group to join")
 @click.option("-p", "--producer-type", type=click.Choice(['basic', 'loop']), help="Type of Kafka producer to run")
+@click.option("--count", type=int, help="[Only valid with -p loop] Number of messages to produce.")
 @click.option("-t", "--topic-name", required=True, help="Name of the topic to consume")
 @click.option("-m", "--message", help="Message to post to the topic")
-@click.option("--count", type=int, help="[Only valid with -p loop] Number of messages to produce.")
-@click.option("-b", "--batch-size", type=int, default=1, help="[Only valid with -c commit] How many messages to process before committing.")
 def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name: str, message: str, count: int, batch_size: int):
     global _consumer_obj
     signal.signal(signal.SIGINT, signal_handler)
