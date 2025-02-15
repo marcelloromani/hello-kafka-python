@@ -2,6 +2,9 @@ from confluent_kafka import Consumer, KafkaError
 
 
 class KafkaBasicConsumer:
+    """
+    Subscribes to a topic and prints messages as strings.
+    """
 
     def __init__(self, configuration: dict, topic_name: str):
         self._c = Consumer(configuration)

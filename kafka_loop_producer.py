@@ -5,6 +5,9 @@ from kafka_basic_producer import KafkaBasicProducer
 
 
 class KafkaLoopProducer(KafkaBasicProducer):
+    """
+    Sends a number of predefined strings with incrementing index to a topic.
+    """
 
     def __init__(self, configuration: dict, topic_name: str):
         super().__init__(configuration, topic_name)

@@ -2,6 +2,9 @@ from confluent_kafka import Producer
 
 
 class KafkaBasicProducer:
+    """
+    Sends a string to a topic.
+    """
 
     def __init__(self, configuration: dict, topic_name: str):
         self._p = Producer(configuration)
