@@ -135,11 +135,11 @@ $ python main.py -p loop -t hello_kafka_2 --count 100000
 ## Create a topic
 
 ```shell
-$ opt/homebrew/bin/kafka-topics --bootstrap-server localhost:9092 --create --topic <topic_name> --partitions <num>
+$ /opt/homebrew/bin/kafka-topics --bootstrap-server localhost:9092 --create --topic <topic_name> --partitions <num>
 ```
 
 ## Delete a topic
 
 ```shell
-$ opt/homebrew/bin/kafka-topics --bootstrap-server localhost:9092 --delete --topic <topic_name>
+$ /opt/homebrew/bin/kafka-topics --bootstrap-server localhost:9092 --delete --topic <topic_name>
 ```
