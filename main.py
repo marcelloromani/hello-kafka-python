@@ -5,6 +5,7 @@ import click
 
 from kafka_basic_consumer import KafkaBasicConsumer
 from kafka_basic_producer import KafkaBasicProducer
+from kafka_commit_consumer import KafkaCommitConsumer
 from kafka_loop_producer import KafkaLoopProducer
 
 producer_conf = {
@@ -28,7 +29,7 @@ def signal_handler(sig, frame):
 
 
 @click.command("kafka-consumer")
-@click.option("-c", "--consumer-type", type=click.Choice(['basic']),
+@click.option("-c", "--consumer-type", type=click.Choice(['basic', 'commit']),
               help="Type of Kafka consumer to run")
 @click.option("-g", "--consumer-group", help="Name of the consumer group to join")
 @click.option("-p", "--producer-type", type=click.Choice(['basic', 'loop']), help="Type of Kafka producer to run")
@@ -43,6 +44,13 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
         print(f"Starting consumer of type {consumer_type} with topic {topic_name}, consumer group {consumer_group}")
         consumer_conf['group.id'] = consumer_group
         c = KafkaBasicConsumer(consumer_conf, topic_name)
+        _consumer_obj = c
+        c.run()
+
+    elif consumer_type == 'commit':
+        print(f"Starting consumer of type {consumer_type} with topic {topic_name}, consumer group {consumer_group}")
+        consumer_conf['group.id'] = consumer_group
+        c = KafkaCommitConsumer(consumer_conf, topic_name)
         _consumer_obj = c
         c.run()
 
