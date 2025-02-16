@@ -2,7 +2,10 @@ import logging
 from timeit import default_timer as timer
 from typing import Optional
 
-from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import Consumer
+from confluent_kafka import KafkaError
+from confluent_kafka import KafkaException
+from confluent_kafka import Message
 
 from kafka_client import KafkaClient
 from msg_processors import IMsgProcessor
@@ -34,50 +37,58 @@ class KafkaCommitConsumer(KafkaClient):
     def print_assignment(self, consumer, partitions):
         self.logger.info('Assignment: %s', partitions)
 
+    def process_msg(self, msg: Message):
+        payload = msg.value().decode('utf-8')
+        self.logger.info("Received: %s", payload)
+        if self._msg_processor is not None:
+            self._msg_processor.process(payload)
+
     def run(self):
-        uncommitted_msgs: int = 0
-        uncommitted_since: Optional[float] = None
-        while not self.shutdown_requested():
+        try:
+            uncommitted_msgs: int = 0
+            uncommitted_since: Optional[float] = None
+            while not self.shutdown_requested():
 
-            # Commit if we processed an entire batch of messages
-            if uncommitted_msgs >= self._batch_size:
-                self.logger.info("Committing %d messages >= batch size %d", uncommitted_msgs, self._batch_size)
-                self._c.commit()
-                uncommitted_msgs = 0
-                uncommitted_since = None
-
-            # Commit if we had uncommitted messages for more than max commit interval
-            if uncommitted_since is not None:
-                uncommitted_age_ms = (timer() - uncommitted_since) * 1000
-                if uncommitted_age_ms >= self._max_commit_interval_ms:
-                    self.logger.info("Committing %d messages after %d ms >= %d", uncommitted_msgs, uncommitted_age_ms,
-                                     self._max_commit_interval_ms)
+                # Commit if we processed an entire batch of messages
+                if uncommitted_msgs >= self._batch_size:
+                    self.logger.info("Committing %d messages >= batch size %d", uncommitted_msgs, self._batch_size)
                     self._c.commit()
                     uncommitted_msgs = 0
                     uncommitted_since = None
 
-            msg = self._c.poll(1.0)
+                # Commit if we had uncommitted messages for more than max commit interval
+                if uncommitted_since is not None:
+                    uncommitted_age_ms = (timer() - uncommitted_since) * 1000
+                    if uncommitted_age_ms >= self._max_commit_interval_ms:
+                        self.logger.info("Committing %d messages after %d ms >= %d", uncommitted_msgs,
+                                         uncommitted_age_ms,
+                                         self._max_commit_interval_ms)
+                        self._c.commit()
+                        uncommitted_msgs = 0
+                        uncommitted_since = None
 
-            if msg is None:
-                continue
+                msg = self._c.poll(1.0)
 
-            if msg.error():
-                if msg.error().code() == KafkaError._PARTITION_EOF:
-                    self.logger.error(msg.error())
+                if msg is None:
                     continue
+
+                if msg.error():
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
+                        # End of partition event
+                        self.logger.info(
+                            "%s %s [%d] reached end at offset %d",
+                            msg.topic(),
+                            msg.partition(),
+                            msg.offset()
+                        )
+                    elif msg.error():
+                        raise KafkaException(msg.error())
                 else:
-                    print(msg.error())
-                    break
-
-            payload = msg.value().decode('utf-8')
-            uncommitted_msgs += 1
-            self.logger.info('Received: %s', payload)
-            if self._msg_processor is not None:
-                self._msg_processor.process(payload)
-
-            # A message cannot stay uncommitted for more than max commit interval milliseconds
-            if uncommitted_since is None:
-                uncommitted_since = timer()
-
-        self.logger.info("Closing consumer")
-        self._c.close()
+                    self.process_msg(msg)
+                    uncommitted_msgs += 1
+                    # Messages cannot stay uncommitted for more than max commit interval milliseconds
+                    if uncommitted_since is None:
+                        uncommitted_since = timer()
+        finally:
+            self.logger.info("Shutdown")
+            self._c.close()
