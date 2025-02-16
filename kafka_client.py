@@ -11,5 +11,5 @@ class KafkaClient:
         return self._shutdown
 
     def shutdown(self):
-        self.logger.info("Shutdown request")
+        self.logger.info("Shutdown requested")
         self._shutdown = True
