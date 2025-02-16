@@ -1,9 +1,14 @@
+import logging
+
 from confluent_kafka import Consumer, KafkaError
+
 
 class KafkaBasicConsumer:
     """
     Subscribes to a topic and prints messages as strings.
     """
+
+    logger = logging.getLogger()
 
     def __init__(self, configuration: dict, topic_name: str):
         self._c = Consumer(configuration)
@@ -11,7 +16,7 @@ class KafkaBasicConsumer:
         self._close = False
 
     def print_assignment(self, consumer, partitions):
-        print('Assignment:', partitions)
+        self.logger.info('Assignment: %s', partitions)
 
     def run(self):
         while not self._close:
@@ -21,15 +26,15 @@ class KafkaBasicConsumer:
                 continue
             if msg.error():
                 if msg.error().code() == KafkaError._PARTITION_EOF:
-                    # End of partition event
+                    self.logger.error(msg.error())
                     continue
                 else:
                     print(msg.error())
                     break
 
-            print('Received message: {}'.format(msg.value().decode('utf-8')))
+            self.logger.info('Received: %s', msg.value().decode('utf-8'))
 
-        print("Closing consumer")
+        self.logger.info("Closing consumer")
         self._c.close()
 
     def close(self):

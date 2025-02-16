@@ -1,8 +1,10 @@
+import logging
 import signal
 from typing import Optional
 
 import click
 
+import logging_setup
 from kafka_basic_consumer import KafkaBasicConsumer
 from kafka_basic_producer import KafkaBasicProducer
 from kafka_commit_consumer import KafkaCommitConsumer
@@ -31,42 +33,48 @@ def signal_handler(sig, frame):
 @click.command("kafka-consumer")
 @click.option("-c", "--consumer-type", type=click.Choice(['basic', 'commit']),
               help="Type of Kafka consumer to run")
-@click.option("-b", "--batch-size", type=int, default=1, help="[Only valid with -c commit] How many messages to process before committing.")
+@click.option("-b", "--batch-size", type=int, default=1,
+              help="[Only valid with -c commit] Commit after processing these many message.")
 @click.option("-g", "--consumer-group", help="Name of the consumer group to join")
 @click.option("-p", "--producer-type", type=click.Choice(['basic', 'loop']), help="Type of Kafka producer to run")
 @click.option("--count", type=int, help="[Only valid with -p loop] Number of messages to produce.")
 @click.option("-t", "--topic-name", required=True, help="Name of the topic to consume")
-@click.option("-m", "--message", help="Message to post to the topic")
-def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name: str, message: str, count: int, batch_size: int):
+@click.option("-m", "--message", help="[Only valid with -p basic] Message to post to the topic")
+def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name: str, message: str, count: int,
+         batch_size: int):
     global _consumer_obj
     signal.signal(signal.SIGINT, signal_handler)
 
+    logging_setup.configure("logging_config.json")
+
+    logger = logging.getLogger()
+
     if consumer_type == 'basic':
-        print(f"Starting consumer of type {consumer_type} with topic {topic_name}, consumer group {consumer_group}")
+        logger.info(f"Starting consumer of type {consumer_type} with topic {topic_name}, consumer group {consumer_group}")
         consumer_conf['group.id'] = consumer_group
         c = KafkaBasicConsumer(consumer_conf, topic_name)
         _consumer_obj = c
         c.run()
 
     elif consumer_type == 'commit':
-        print(f"Starting consumer of type {consumer_type} with topic {topic_name}, consumer group {consumer_group}")
+        logger.info(f"Starting consumer of type {consumer_type} with topic {topic_name}, consumer group {consumer_group}")
         consumer_conf['group.id'] = consumer_group
         c = KafkaCommitConsumer(consumer_conf, topic_name, batch_size)
         _consumer_obj = c
         c.run()
 
     elif producer_type == 'basic':
-        print(f"Starting producer of type {producer_type} with topic {topic_name}")
+        logger.info(f"Starting producer of type {producer_type} with topic {topic_name}")
         p = KafkaBasicProducer(producer_conf, topic_name)
         p.send(message)
 
     elif producer_type == 'loop':
-        print(f"Starting producer of type {producer_type} with topic {topic_name} for {count} messages")
+        logger.info(f"Starting producer of type {producer_type} with topic {topic_name} for {count} messages")
         p = KafkaLoopProducer(producer_conf, topic_name)
         p.send_messages(count)
 
     else:
-        print("No action specified. Please use --help for options.")
+        logger.error("No action specified. Please use --help for options.")
 
 
 if __name__ == '__main__':
