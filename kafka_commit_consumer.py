@@ -75,5 +75,4 @@ class KafkaCommitConsumer(KafkaConsumer):
                     if uncommitted_since is None:
                         uncommitted_since = timer()
         finally:
-            self.logger.info("Shutdown")
-            self._c.close()
+            self._perform_shutdown()

@@ -40,5 +40,4 @@ class KafkaBasicConsumer(KafkaConsumer):
                 else:
                     self.process_msg(msg)
         finally:
-            self.logger.info("Shutdown")
-            self._c.close()
+            self._perform_shutdown()
