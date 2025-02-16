@@ -25,6 +25,7 @@ class KafkaCommitConsumer:
         self._max_commit_interval_ms = 5000
         self._msg_processor = msg_processor
 
+        self.logger.info("Topic %s", topic_name)
         self.logger.info("enable.auto.commit: %s", configuration['enable.auto.commit'])
         self.logger.info("Batch size: %d", self._batch_size)
         self.logger.info("Max uncommitted: %d ms", self._max_commit_interval_ms)

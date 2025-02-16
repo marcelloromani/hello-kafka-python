@@ -15,6 +15,9 @@ class KafkaBasicConsumer:
         self._c.subscribe([topic_name], on_assign=self.print_assignment)
         self._close = False
 
+        self.logger.info("Topic %s", topic_name)
+
+
     def print_assignment(self, consumer, partitions):
         self.logger.info('Assignment: %s', partitions)
 
@@ -32,7 +35,8 @@ class KafkaBasicConsumer:
                     print(msg.error())
                     break
 
-            self.logger.info('Received: %s', msg.value().decode('utf-8'))
+            payload = msg.value().decode('utf-8')
+            self.logger.info('Received: %s', payload)
 
         self.logger.info("Closing consumer")
         self._c.close()
