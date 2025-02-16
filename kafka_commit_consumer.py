@@ -67,7 +67,7 @@ class KafkaCommitConsumer(KafkaClient):
                         uncommitted_msgs = 0
                         uncommitted_since = None
 
-                msg = self._c.poll(1.0)
+                msg = self._c.poll(timeout=1.0)
 
                 if msg is None:
                     continue

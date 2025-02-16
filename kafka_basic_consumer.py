@@ -32,7 +32,7 @@ class KafkaBasicConsumer(KafkaClient):
     def run(self):
         try:
             while not self.shutdown_requested():
-                msg = self._c.poll(1.0)
+                msg = self._c.poll(timeout=1.0)
 
                 if msg is None:
                     continue
