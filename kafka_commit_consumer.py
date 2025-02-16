@@ -11,7 +11,7 @@ class KafkaCommitConsumer:
     """
     Subscribes to a topic and prints messages as strings.
     Disables auto-commit.
-    Commits every received message.
+    Commits every batch_size messages or every _max_commit_interval_ms (hardcoded to 5000ms).
     """
 
     logger = logging.getLogger()
