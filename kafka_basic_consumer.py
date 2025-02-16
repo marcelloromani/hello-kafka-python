@@ -1,6 +1,5 @@
 from confluent_kafka import Consumer, KafkaError
 
-
 class KafkaBasicConsumer:
     """
     Subscribes to a topic and prints messages as strings.

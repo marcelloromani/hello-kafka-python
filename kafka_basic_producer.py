@@ -4,6 +4,7 @@ from confluent_kafka import Producer
 class KafkaBasicProducer:
     """
     Sends a string to a topic.
+    Flushes after every send.
     """
 
     def __init__(self, configuration: dict, topic_name: str):
