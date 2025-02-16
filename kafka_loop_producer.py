@@ -21,10 +21,7 @@ class KafkaLoopProducer(KafkaBasicProducer):
     def send_messages(self, msg_count: int):
         for i in range(msg_count):
             self.send(f"[gen: {self._generation}] Message {i}")
-            if self._close:
+            if self.shutdown_requested():
                 break
         self.logger.info("Closing producer")
 
-    def close(self):
-        self.logger.info("Request to close")
-        self._close = True
