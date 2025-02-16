@@ -1,5 +1,6 @@
 import logging
 from timeit import default_timer as timer
+from typing import Optional
 
 from confluent_kafka import Consumer, KafkaError
 
@@ -19,23 +20,31 @@ class KafkaCommitConsumer:
         self._c.subscribe([topic_name], on_assign=self.print_assignment)
         self._close = False
         self._batch_size = batch_size
-        self._max_commit_interval_ms = 100
+        self._max_commit_interval_ms = 5000
 
     def print_assignment(self, consumer, partitions):
         self.logger.info('Assignment: %s', partitions)
 
     def run(self):
-        processed_msgs: int = 0
-        last_commit_time: float = timer()
+        uncommitted_msgs: int = 0
+        uncommitted_since: Optional[float] = None
         while not self._close:
 
-            if 0 < processed_msgs < self._batch_size:
-                time_since_last_commit_ms = (timer() - last_commit_time) * 1000
-                if time_since_last_commit_ms >= self._max_commit_interval_ms:
-                    self.logger.info("Commit after %d ms", time_since_last_commit_ms)
+            # Commit if we processed an entire batch of messages
+            if uncommitted_msgs >= self._batch_size:
+                self.logger.info("Committing %d messages >= batch size %d", uncommitted_msgs, self._batch_size)
+                self._c.commit()
+                uncommitted_msgs = 0
+                uncommitted_since = None
+
+            # Commit if we had uncommitted messages for more than max commit interval
+            if uncommitted_since is not None:
+                uncommitted_age_ms = (timer() - uncommitted_since) * 1000
+                if uncommitted_age_ms >= self._max_commit_interval_ms:
+                    self.logger.info("Committing %d messages after %d ms >= %d", uncommitted_msgs, uncommitted_age_ms, self._max_commit_interval_ms)
                     self._c.commit()
-                    processed_msgs = 0
-                    last_commit_time = timer()
+                    uncommitted_msgs = 0
+                    uncommitted_since = None
 
             msg = self._c.poll(1.0)
 
@@ -51,12 +60,11 @@ class KafkaCommitConsumer:
                     break
 
             self.logger.info('Received: %s', msg.value().decode('utf-8'))
-            processed_msgs += 1
-            if processed_msgs >= self._batch_size:
-                self.logger.info("Commit after %d messages", processed_msgs)
-                self._c.commit()
-                processed_msgs = 0
-                last_commit_time = timer()
+            uncommitted_msgs += 1
+
+            # A message cannot stay uncommitted for more than max commit interval milliseconds
+            if uncommitted_since is None:
+                uncommitted_since = timer()
 
         self.logger.info("Closing consumer")
         self._c.close()
