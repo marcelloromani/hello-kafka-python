@@ -1,9 +1,14 @@
 import logging
 
-from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import Consumer
+from confluent_kafka import KafkaError
+from confluent_kafka import KafkaException
+from confluent_kafka import Message
+
+from kafka_client import KafkaClient
 
 
-class KafkaBasicConsumer:
+class KafkaBasicConsumer(KafkaClient):
     """
     Subscribes to a topic and prints messages as strings.
     """
@@ -11,36 +16,41 @@ class KafkaBasicConsumer:
     logger = logging.getLogger()
 
     def __init__(self, configuration: dict, topic_name: str):
+        super().__init__()
         self._c = Consumer(configuration)
         self._c.subscribe([topic_name], on_assign=self.print_assignment)
-        self._close = False
 
         self.logger.info("Topic %s", topic_name)
 
-
     def print_assignment(self, consumer, partitions):
-        self.logger.info('Assignment: %s', partitions)
+        self.logger.info("Assignment: %s", partitions)
+
+    def process_msg(self, msg: Message):
+        payload = msg.value().decode('utf-8')
+        self.logger.info("Received: %s", payload)
 
     def run(self):
         while not self._close:
             msg = self._c.poll(1.0)
+        try:
+            while not self.shutdown_requested():
 
-            if msg is None:
-                continue
-            if msg.error():
-                if msg.error().code() == KafkaError._PARTITION_EOF:
-                    self.logger.error(msg.error())
+                if msg is None:
                     continue
+
+                if msg.error():
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
+                        # End of partition event
+                        self.logger.info(
+                            "%s %s [%d] reached end at offset %d",
+                            msg.topic(),
+                            msg.partition(),
+                            msg.offset()
+                        )
+                    elif msg.error():
+                        raise KafkaException(msg.error())
                 else:
-                    print(msg.error())
-                    break
-
-            payload = msg.value().decode('utf-8')
-            self.logger.info('Received: %s', payload)
-
-        self.logger.info("Closing")
-        self._c.close()
-
-    def close(self):
-        self.logger.info("Request to close")
-        self._close = True
+                    self.process_msg(msg)
+        finally:
+            self.logger.info("Shutdown")
+            self._c.close()

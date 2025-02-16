@@ -4,10 +4,11 @@ from typing import Optional
 
 from confluent_kafka import Consumer, KafkaError
 
+from kafka_client import KafkaClient
 from msg_processors import IMsgProcessor
 
 
-class KafkaCommitConsumer:
+class KafkaCommitConsumer(KafkaClient):
     """
     Subscribes to a topic and prints messages as strings.
     Disables auto-commit.
@@ -17,10 +18,10 @@ class KafkaCommitConsumer:
     logger = logging.getLogger()
 
     def __init__(self, configuration: dict, topic_name: str, batch_size: int, msg_processor: Optional[IMsgProcessor]):
+        super().__init__()
         configuration['enable.auto.commit'] = False
         self._c = Consumer(configuration)
         self._c.subscribe([topic_name], on_assign=self.print_assignment)
-        self._close = False
         self._batch_size = batch_size
         self._max_commit_interval_ms = 5000
         self._msg_processor = msg_processor
@@ -36,7 +37,7 @@ class KafkaCommitConsumer:
     def run(self):
         uncommitted_msgs: int = 0
         uncommitted_since: Optional[float] = None
-        while not self._close:
+        while not self.shutdown_requested():
 
             # Commit if we processed an entire batch of messages
             if uncommitted_msgs >= self._batch_size:
@@ -80,6 +81,3 @@ class KafkaCommitConsumer:
 
         self.logger.info("Closing consumer")
         self._c.close()
-
-    def close(self):
-        self._close = True

@@ -6,6 +6,7 @@ import click
 import logging_setup
 from kafka_basic_consumer import KafkaBasicConsumer
 from kafka_basic_producer import KafkaBasicProducer
+from kafka_client import KafkaClient
 from kafka_commit_consumer import KafkaCommitConsumer
 from kafka_loop_producer import KafkaLoopProducer
 from msg_processors import PersistToTextFileMsgProcessor
@@ -20,15 +21,18 @@ consumer_conf = {
     'auto.offset.reset': 'earliest',
 }
 
-_prod_cons_objs = []
-def register_producer_or_consumer(obj):
-    _prod_cons_objs.append(obj)
+_kafka_clients: list[KafkaClient] = []
+
+
+def register_client(obj: KafkaClient):
+    _kafka_clients.append(obj)
+
 
 def signal_handler(sig, frame):
     logger = logging.getLogger()
     logger.info('You pressed Ctrl+C!')
-    for obj in _prod_cons_objs:
-        obj.close()
+    for obj in _kafka_clients:
+        obj.shutdown()
 
 
 @click.command("kafka-consumer")
@@ -44,7 +48,6 @@ def signal_handler(sig, frame):
 @click.option("-m", "--message", help="[Only valid with -p basic] Message to post to the topic.")
 def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name: str, message: str, count: int,
          batch_size: int, output_file: str):
-
     signal.signal(signal.SIGINT, signal_handler)
 
     logging_setup.configure("logging_config.json")
@@ -56,7 +59,7 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
             f"Starting consumer of type {consumer_type} with topic {topic_name}, consumer group {consumer_group}")
         consumer_conf['group.id'] = consumer_group
         c = KafkaBasicConsumer(consumer_conf, topic_name)
-        register_producer_or_consumer(c)
+        register_client(c)
         c.run()
 
     elif consumer_type == 'commit':
@@ -68,7 +71,7 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
             logger.info("Persisting messages to file %s", output_file)
             msg_proc = PersistToTextFileMsgProcessor(output_file)
         c = KafkaCommitConsumer(consumer_conf, topic_name, batch_size, msg_proc)
-        register_producer_or_consumer(c)
+        register_client(c)
         c.run()
 
     elif producer_type == 'basic':
@@ -79,7 +82,7 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
     elif producer_type == 'loop':
         logger.info(f"Starting producer of type {producer_type} with topic {topic_name} for {count} messages")
         p = KafkaLoopProducer(producer_conf, topic_name)
-        register_producer_or_consumer(p)
+        register_client(p)
         p.send_messages(count)
 
     else:
