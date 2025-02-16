@@ -23,5 +23,5 @@ class KafkaLoopProducer(KafkaBasicProducer):
             self.send(f"[gen: {self._generation}] Message {i}")
             if self.shutdown_requested():
                 break
-        self.logger.info("Closing producer")
+        self.logger.info("Shutdown")
 
