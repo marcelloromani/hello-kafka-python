@@ -30,10 +30,9 @@ class KafkaBasicConsumer(KafkaClient):
         self.logger.info("Received: %s", payload)
 
     def run(self):
-        while not self._close:
-            msg = self._c.poll(1.0)
         try:
             while not self.shutdown_requested():
+                msg = self._c.poll(1.0)
 
                 if msg is None:
                     continue
