@@ -14,7 +14,7 @@ class KafkaCommitConsumer:
 
     logger = logging.getLogger()
 
-    def __init__(self, configuration: dict, topic_name: str, batch_size):
+    def __init__(self, configuration: dict, topic_name: str, batch_size: int):
         configuration['enable.auto.commit'] = False
         self._c = Consumer(configuration)
         self._c.subscribe([topic_name], on_assign=self.print_assignment)
