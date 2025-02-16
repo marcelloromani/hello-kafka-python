@@ -22,6 +22,10 @@ class KafkaCommitConsumer:
         self._batch_size = batch_size
         self._max_commit_interval_ms = 5000
 
+        self.logger.info("enable.auto.commit: %s", configuration['enable.auto.commit'])
+        self.logger.info("Batch size: %d", self._batch_size)
+        self.logger.info("Max uncommitted: %d ms", self._max_commit_interval_ms)
+
     def print_assignment(self, consumer, partitions):
         self.logger.info('Assignment: %s', partitions)
 
