@@ -4,6 +4,8 @@ from typing import Optional
 
 from confluent_kafka import Consumer, KafkaError
 
+from msg_processors import IMsgProcessor
+
 
 class KafkaCommitConsumer:
     """
@@ -14,13 +16,14 @@ class KafkaCommitConsumer:
 
     logger = logging.getLogger()
 
-    def __init__(self, configuration: dict, topic_name: str, batch_size: int):
+    def __init__(self, configuration: dict, topic_name: str, batch_size: int, msg_processor: Optional[IMsgProcessor]):
         configuration['enable.auto.commit'] = False
         self._c = Consumer(configuration)
         self._c.subscribe([topic_name], on_assign=self.print_assignment)
         self._close = False
         self._batch_size = batch_size
         self._max_commit_interval_ms = 5000
+        self._msg_processor = msg_processor
 
         self.logger.info("enable.auto.commit: %s", configuration['enable.auto.commit'])
         self.logger.info("Batch size: %d", self._batch_size)
@@ -45,7 +48,8 @@ class KafkaCommitConsumer:
             if uncommitted_since is not None:
                 uncommitted_age_ms = (timer() - uncommitted_since) * 1000
                 if uncommitted_age_ms >= self._max_commit_interval_ms:
-                    self.logger.info("Committing %d messages after %d ms >= %d", uncommitted_msgs, uncommitted_age_ms, self._max_commit_interval_ms)
+                    self.logger.info("Committing %d messages after %d ms >= %d", uncommitted_msgs, uncommitted_age_ms,
+                                     self._max_commit_interval_ms)
                     self._c.commit()
                     uncommitted_msgs = 0
                     uncommitted_since = None
@@ -63,8 +67,11 @@ class KafkaCommitConsumer:
                     print(msg.error())
                     break
 
-            self.logger.info('Received: %s', msg.value().decode('utf-8'))
+            payload = msg.value().decode('utf-8')
             uncommitted_msgs += 1
+            self.logger.info('Received: %s', payload)
+            if self._msg_processor is not None:
+                self._msg_processor.process(payload)
 
             # A message cannot stay uncommitted for more than max commit interval milliseconds
             if uncommitted_since is None:
