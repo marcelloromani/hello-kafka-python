@@ -38,8 +38,9 @@ class KafkaBasicConsumer:
             payload = msg.value().decode('utf-8')
             self.logger.info('Received: %s', payload)
 
-        self.logger.info("Closing consumer")
+        self.logger.info("Closing")
         self._c.close()
 
     def close(self):
+        self.logger.info("Request to close")
         self._close = True

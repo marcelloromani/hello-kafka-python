@@ -12,6 +12,7 @@ class KafkaLoopProducer(KafkaBasicProducer):
     def __init__(self, configuration: dict, topic_name: str):
         super().__init__(configuration, topic_name)
         self._generation = self._generate_obj_unique_id()
+        self._close = False
 
     @staticmethod
     def _generate_obj_unique_id() -> str:
@@ -20,3 +21,10 @@ class KafkaLoopProducer(KafkaBasicProducer):
     def send_messages(self, msg_count: int):
         for i in range(msg_count):
             self.send(f"[gen: {self._generation}] Message {i}")
+            if self._close:
+                break
+        self.logger.info("Closing producer")
+
+    def close(self):
+        self.logger.info("Request to close")
+        self._close = True
