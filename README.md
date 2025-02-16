@@ -10,12 +10,38 @@ $ /opt/homebrew/bin/zookeeper-server-start /opt/homebrew/etc/zookeeper/zoo.cfg
 $ /opt/homebrew/bin/kafka-server-start /opt/homebrew/etc/kafka/server.properties 
 ```
 
-# Python prerequisites
+# Python stuff
+
+## Requirements
+
+Before running the script, create and activate a virtualenv, and install the requirements
 
 ```shell
 $ make venv
 $ source .venv/bin/activate
 $ make requirements
+```
+
+## Logging configuration
+
+Default logging configuration:
+
+* `INFO` messages are printed to the console
+* `INFO` and `DEBUG` messages are written to `debug.log`
+
+* To change the overall log level, change line 31 of `logging_config.json`:
+
+```text
+  "loggers": {
+    "root": {
+      "level": "DEBUG",    <==========
+      "handlers": [
+        "stderr",
+        "file"
+      ]
+    }
+  }
+
 ```
 
 # Topic with 1 partition
