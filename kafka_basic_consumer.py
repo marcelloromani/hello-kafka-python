@@ -1,4 +1,5 @@
 import logging
+from timeit import default_timer as timer
 from typing import Optional
 
 from confluent_kafka import KafkaError
@@ -21,6 +22,8 @@ class KafkaBasicConsumer(KafkaConsumer):
     def run(self):
         try:
             while not self.shutdown_requested():
+                poll_start = timer()
+
                 msg = self._c.poll(timeout=1.0)
 
                 if msg is None:
@@ -39,5 +42,8 @@ class KafkaBasicConsumer(KafkaConsumer):
                         raise KafkaException(msg.error())
                 else:
                     self.process_msg(msg)
+
+                    self._msg_stats["msg_poll_cycle_time_s"] += (timer() - poll_start)
+
         finally:
             self._perform_shutdown()

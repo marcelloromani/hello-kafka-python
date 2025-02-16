@@ -33,6 +33,7 @@ class KafkaCommitConsumer(KafkaConsumer):
             uncommitted_msgs: int = 0
             uncommitted_since: Optional[float] = None
             while not self.shutdown_requested():
+                poll_start = timer()
 
                 # Commit if we processed an entire batch of messages
                 if uncommitted_msgs >= self._batch_size:
@@ -70,6 +71,9 @@ class KafkaCommitConsumer(KafkaConsumer):
                         raise KafkaException(msg.error())
                 else:
                     self.process_msg(msg)
+
+                    self._msg_stats["msg_poll_cycle_time_s"] += (timer() - poll_start)
+
                     uncommitted_msgs += 1
                     # Messages cannot stay uncommitted for more than max commit interval milliseconds
                     if uncommitted_since is None:

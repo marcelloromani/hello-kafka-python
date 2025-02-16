@@ -1,6 +1,7 @@
+import json
 import logging
 from typing import Optional
-import json
+
 from confluent_kafka import Consumer
 from confluent_kafka import Message
 
@@ -23,11 +24,18 @@ class KafkaConsumer(KafkaClient):
             "decode_error_count": 0,
             "processed_count": 0,
             "process_error_count": 0,
+            "msg_poll_cycle_time_s": 0,
         }
 
         self.logger.info("Topic: %s", topic_name)
 
     def get_msg_stats(self):
+        success_msg_count = self._msg_stats["received_count"] - self._msg_stats["decode_error_count"] - self._msg_stats["process_error_count"]
+        try:
+            msg_per_sec = success_msg_count / self._msg_stats["msg_poll_cycle_time_s"]
+        except ZeroDivisionError:
+            msg_per_sec = 0
+        self._msg_stats["msg_per_sec"] = msg_per_sec
         return self._msg_stats
 
     def print_assignment(self, consumer, partitions):
@@ -54,4 +62,4 @@ class KafkaConsumer(KafkaClient):
     def _perform_shutdown(self):
         self.logger.info("Shutting down")
         self._c.close()
-        self.logger.info("Message stats: %s", json.dumps(self.get_msg_stats(), indent=4))
+        print("Message stats:\n", json.dumps(self.get_msg_stats(), indent=4))
