@@ -1,33 +1,22 @@
 import logging
+from typing import Optional
 
-from confluent_kafka import Consumer
 from confluent_kafka import KafkaError
 from confluent_kafka import KafkaException
-from confluent_kafka import Message
 
-from kafka_client import KafkaClient
+from kafka_consumer import KafkaConsumer
+from msg_processors import IMsgProcessor
 
 
-class KafkaBasicConsumer(KafkaClient):
+class KafkaBasicConsumer(KafkaConsumer):
     """
     Subscribes to a topic and prints messages as strings.
     """
 
     logger = logging.getLogger()
 
-    def __init__(self, configuration: dict, topic_name: str):
-        super().__init__()
-        self._c = Consumer(configuration)
-        self._c.subscribe([topic_name], on_assign=self.print_assignment)
-
-        self.logger.info("Topic %s", topic_name)
-
-    def print_assignment(self, consumer, partitions):
-        self.logger.info("Assignment: %s", partitions)
-
-    def process_msg(self, msg: Message):
-        payload = msg.value().decode('utf-8')
-        self.logger.info("Received: %s", payload)
+    def __init__(self, configuration: dict, topic_name: str, msg_processor: Optional[IMsgProcessor]):
+        super().__init__(configuration, topic_name, msg_processor)
 
     def run(self):
         try:

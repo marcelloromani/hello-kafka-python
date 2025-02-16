@@ -40,7 +40,7 @@ def signal_handler(sig, frame):
               help="Type of Kafka consumer to run")
 @click.option("-b", "--batch-size", type=int, default=1,
               help="[Only valid with -c commit] Commit after processing these many message.")
-@click.option("--output-file", help="[Only valid with -c commit] Save all messages to this file.")
+@click.option("--output-file", help="Save all messages to this file.")
 @click.option("-g", "--consumer-group", help="Name of the consumer group to join.")
 @click.option("-p", "--producer-type", type=click.Choice(['basic', 'loop']), help="Type of Kafka producer to run.")
 @click.option("--count", type=int, help="[Only valid with -p loop] Number of messages to produce.")
@@ -54,33 +54,32 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
 
     logger = logging.getLogger()
 
+    # saves messages to file
+    message_processor = None
+    if output_file is not None:
+        message_processor = PersistToTextFileMsgProcessor(output_file)
+
     if consumer_type == 'basic':
-        logger.info(
-            f"Starting consumer of type {consumer_type} with topic {topic_name}, consumer group {consumer_group}")
+        logger.info(f"Starting consumer type={consumer_type} topic={topic_name}, consumer_group={consumer_group}")
         consumer_conf['group.id'] = consumer_group
-        c = KafkaBasicConsumer(consumer_conf, topic_name)
+        c = KafkaBasicConsumer(consumer_conf, topic_name, message_processor)
         register_client(c)
         c.run()
 
     elif consumer_type == 'commit':
-        logger.info(
-            f"Starting consumer of type {consumer_type} with topic {topic_name}, consumer group {consumer_group}")
+        logger.info(f"Starting consumer type={consumer_type} topic={topic_name}, consumer_group={consumer_group}")
         consumer_conf['group.id'] = consumer_group
-        msg_proc = None
-        if output_file is not None:
-            logger.info("Persisting messages to file %s", output_file)
-            msg_proc = PersistToTextFileMsgProcessor(output_file)
-        c = KafkaCommitConsumer(consumer_conf, topic_name, batch_size, msg_proc)
+        c = KafkaCommitConsumer(consumer_conf, topic_name, batch_size, message_processor)
         register_client(c)
         c.run()
 
     elif producer_type == 'basic':
-        logger.info(f"Starting producer of type {producer_type} with topic {topic_name}")
+        logger.info(f"Starting producer type={producer_type} topic={topic_name}")
         p = KafkaBasicProducer(producer_conf, topic_name)
         p.send(message)
 
     elif producer_type == 'loop':
-        logger.info(f"Starting producer of type {producer_type} with topic {topic_name} for {count} messages")
+        logger.info(f"Starting producer type={producer_type} topic={topic_name} msg_count={count}")
         p = KafkaLoopProducer(producer_conf, topic_name)
         register_client(p)
         p.send_messages(count)
