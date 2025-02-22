@@ -15,6 +15,10 @@ class KafkaConsumer(KafkaClient):
     def __init__(self, configuration: dict, topic_name: str, msg_processor: Optional[IMsgProcessor]):
         super().__init__()
 
+        self.logger.debug("Consumer configuration: %s", configuration)
+        if configuration['group.id'] is None:
+            raise ValueError('group.id cannot be None')
+
         self._msg_processor = msg_processor
         self._c = Consumer(configuration)
         self._c.subscribe([topic_name], on_assign=self.print_assignment)
