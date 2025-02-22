@@ -3,8 +3,14 @@ import logging
 
 class IMsgProcessor:
 
-    def process(self, payload: str):
-        raise NotImplementedError
+    def pre_send_hook(self, payload: str):
+        pass
+
+    def post_send_hook(self, payload: str):
+        pass
+
+    def post_receive_hook(self, payload: str):
+        pass
 
 
 class PersistToTextFileMsgProcessor(IMsgProcessor):
@@ -24,6 +30,10 @@ class PersistToTextFileMsgProcessor(IMsgProcessor):
     def __exit__(self, exc_type, exc_value, traceback):
         self._fd.close()
 
-    def process(self, payload: str):
+    def post_receive_hook(self, payload: str):
+        self._fd.write(payload)
+        self._fd.write("\n")
+
+    def post_send_hook(self, payload: str):
         self._fd.write(payload)
         self._fd.write("\n")

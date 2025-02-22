@@ -57,7 +57,7 @@ class KafkaConsumer(KafkaClient):
 
         if payload is not None and self._msg_processor is not None:
             try:
-                self._msg_processor.process(payload)
+                self._msg_processor.post_receive_hook(payload)
                 self._msg_stats["processed_count"] += 1
             except Exception as e:
                 self.logger.error("Cannot process message: %s", e)

@@ -1,7 +1,9 @@
 import hashlib
 import time
+from typing import Optional
 
 from kafka_basic_producer import KafkaBasicProducer
+from msg_processors import IMsgProcessor
 
 
 class KafkaLoopProducer(KafkaBasicProducer):
@@ -9,8 +11,8 @@ class KafkaLoopProducer(KafkaBasicProducer):
     Sends a number of predefined strings with incrementing index to a topic.
     """
 
-    def __init__(self, configuration: dict, topic_name: str):
-        super().__init__(configuration, topic_name)
+    def __init__(self, configuration: dict, topic_name: str, msg_processor: Optional[IMsgProcessor]):
+        super().__init__(configuration, topic_name, msg_processor)
         self._generation = self._generate_obj_unique_id()
         self._close = False
 
@@ -24,4 +26,3 @@ class KafkaLoopProducer(KafkaBasicProducer):
             if self.shutdown_requested():
                 break
         self.logger.info("Shutdown")
-

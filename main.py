@@ -49,7 +49,7 @@ def signal_handler(sig, frame):
 @click.option("-m", "--message", help="[Only valid with -p basic] Message to post to the topic.")
 @click.option("-l", "--log-level", type=click.Choice(['DEBUG', 'INFO', 'WARN', 'ERROR']), help="Log level")
 def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name: str, message: str, count: int,
-         batch_size: int, output_file: str, log_level: Optional[str]):
+         batch_size: int, output_file: Optional[str], log_level: Optional[str]):
     signal.signal(signal.SIGINT, signal_handler)
 
     logging_setup.configure("logging_config.json")
@@ -80,12 +80,12 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
 
     elif producer_type == 'basic':
         logger.info(f"Starting producer type={producer_type} topic={topic_name}")
-        p = KafkaBasicProducer(producer_conf, topic_name)
+        p = KafkaBasicProducer(producer_conf, topic_name, message_processor)
         p.send(message)
 
     elif producer_type == 'loop':
         logger.info(f"Starting producer type={producer_type} topic={topic_name} msg_count={count}")
-        p = KafkaLoopProducer(producer_conf, topic_name)
+        p = KafkaLoopProducer(producer_conf, topic_name, message_processor)
         register_client(p)
         p.send_messages(count)
 
