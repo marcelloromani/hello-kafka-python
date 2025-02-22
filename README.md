@@ -22,28 +22,6 @@ $ source .venv/bin/activate
 $ make requirements
 ```
 
-## Logging configuration
-
-Default logging configuration:
-
-* `INFO` messages are printed to the console
-* `INFO` and `DEBUG` messages are written to `debug.log`
-
-* To change the overall log level, change line 31 of `logging_config.json`:
-
-```text
-  "loggers": {
-    "root": {
-      "level": "DEBUG",    <==========
-      "handlers": [
-        "stderr",
-        "file"
-      ]
-    }
-  }
-
-```
-
 # Topic with 1 partition
 
 ## Create topic

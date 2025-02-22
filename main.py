@@ -1,5 +1,6 @@
 import logging
 import signal
+from typing import Optional
 
 import click
 
@@ -46,11 +47,15 @@ def signal_handler(sig, frame):
 @click.option("--count", type=int, help="[Only valid with -p loop] Number of messages to produce.")
 @click.option("-t", "--topic-name", required=True, help="Name of the topic to consume.")
 @click.option("-m", "--message", help="[Only valid with -p basic] Message to post to the topic.")
+@click.option("-l", "--log-level", type=click.Choice(['DEBUG', 'INFO', 'WARN', 'ERROR']), help="Log level")
 def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name: str, message: str, count: int,
-         batch_size: int, output_file: str):
+         batch_size: int, output_file: str, log_level: Optional[str]):
     signal.signal(signal.SIGINT, signal_handler)
 
     logging_setup.configure("logging_config.json")
+    if log_level is not None:
+        root_logger = logging.getLogger('root')
+        root_logger.setLevel(log_level)
 
     logger = logging.getLogger()
 
