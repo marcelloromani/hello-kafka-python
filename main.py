@@ -40,7 +40,7 @@ def signal_handler(sig, frame):
               help="Type of Kafka consumer to run")
 @click.option("-b", "--batch-size", type=int, default=1,
               help="[Only valid with -c commit] Commit after processing these many message.")
-@click.option("--output-file", help="Save all messages to this file.")
+@click.option("-o", "--output-file", help="[Only relevant to consumers] Save messages to file.")
 @click.option("-g", "--consumer-group", help="Name of the consumer group to join.")
 @click.option("-p", "--producer-type", type=click.Choice(['basic', 'loop']), help="Type of Kafka producer to run.")
 @click.option("--count", type=int, help="[Only valid with -p loop] Number of messages to produce.")
