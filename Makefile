@@ -3,8 +3,7 @@ test:
 	uv run pytest
 
 lint:
-	uv run ruff check src
-	uv run ruff check tests
+	uv run ruff check .
 
 
 depcheck:
