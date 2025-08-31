@@ -10,18 +10,6 @@ $ /opt/homebrew/bin/zookeeper-server-start /opt/homebrew/etc/zookeeper/zoo.cfg
 $ /opt/homebrew/bin/kafka-server-start /opt/homebrew/etc/kafka/server.properties 
 ```
 
-# Python stuff
-
-## Requirements
-
-Before running the script, create and activate a virtualenv, and install the requirements
-
-```shell
-$ make venv
-$ source .venv/bin/activate
-$ make requirements
-```
-
 # Topic with 1 partition
 
 ## Create topic
@@ -41,13 +29,13 @@ $ /opt/homebrew/bin/kafka-topics --bootstrap-server localhost:9092 --topic hello
 ## Single consumer
 
 ```shell
-$ python main.py -c basic -t hello_kafka -g "group1"
+$ uv run src/hello_kafka_python/main.py -c basic -t hello_kafka -g "group1"
 ```
 
 ### Send a message to the topic
 
 ```shell
-$ python main.py -p basic -t hello_kafka -m "Hello, Kafka!"
+$ uv run src/hello_kafka_python/main.py -p basic -t hello_kafka -m "Hello, Kafka!"
 ```
 
 ### Result
@@ -58,18 +46,18 @@ The consumer receives and prints the message.
 
 In one terminal, run:
 ```shell
-$ python main.py -c basic -t hello_kafka -g "group_1"
+$ uv run src/hello_kafka_python/main.py -c basic -t hello_kafka -g "group_1"
 ```
 
 In another terminal, run:
 ```shell
-$ python main.py -c basic -t hello_kafka -g "group_1"
+$ uv run src/hello_kafka_python/main.py -c basic -t hello_kafka -g "group_1"
 ```
 
 ### Send a message to the topic
 
 ```shell
-$ python main.py -p basic -t hello_kafka -m "Hello, Kafka!"
+$ uv run src/hello_kafka_python/main.py -p basic -t hello_kafka -m "Hello, Kafka!"
 ```
 
 ### Result
@@ -80,18 +68,18 @@ Only one of the consumers will print the message.
 
 In one terminal, run:
 ```shell
-$ python main.py -c basic -t hello_kafka -g "group_1"
+$ uv run src/hello_kafka_python/main.py -c basic -t hello_kafka -g "group_1"
 ```
 
 In another terminal, run:
 ```shell
-$ python main.py -c basic -t hello_kafka -g "group_2"
+$ uv run src/hello_kafka_python/main.py -c basic -t hello_kafka -g "group_2"
 ```
 
 ### Send a message to the topic
 
 ```shell
-$ python main.py -p basic -t hello_kafka -m "Hello, Kafka!"
+$ uv run src/hello_kafka_python/main.py -p basic -t hello_kafka -m "Hello, Kafka!"
 ```
 
 ### Result
@@ -108,12 +96,12 @@ $ /opt/homebrew/bin/kafka-topics --bootstrap-server localhost:9092 --create --to
 
 In one terminal, run:
 ```shell
-$ python main.py -c basic -t hello_kafka_2 -g "group_1"
+$ uv run src/hello_kafka_python/main.py -c basic -t hello_kafka_2 -g "group_1"
 ```
 
 In another terminal, run:
 ```shell
-$ python main.py -c basic -t hello_kafka_2 -g "group_1"
+$ uv run src/hello_kafka_python/main.py -c basic -t hello_kafka_2 -g "group_1"
 ```
 
 ### Send messages to the topic
@@ -121,7 +109,7 @@ $ python main.py -c basic -t hello_kafka_2 -g "group_1"
 Run this multiple times:
 
 ```shell
-$ python main.py -p basic -t hello_kafka -m "Hello, Kafka!"
+$ uv run src/hello_kafka_python/main.py -p basic -t hello_kafka -m "Hello, Kafka!"
 ```
 
 ### Result:
@@ -131,7 +119,7 @@ Messages get to the different consumers in a round-robin-ish fashion.
 ### Improved visualisation of message distribution among clients
 
 ```shell
-$ python main.py -p loop -t hello_kafka_2 --count 100000
+$ uv run src/hello_kafka_python/main.py -p loop -t hello_kafka_2 --count 100000
 ```
 
 # Kafka commands reference

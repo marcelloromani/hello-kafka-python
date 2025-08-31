@@ -1,5 +1,6 @@
 import logging
 import signal
+from pathlib import Path
 from typing import Optional
 
 import click
@@ -52,7 +53,9 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
          batch_size: int, output_file: Optional[str], log_level: Optional[str]):
     signal.signal(signal.SIGINT, signal_handler)
 
-    logging_setup.configure("logging_config.json")
+    logging_config_file = Path(__file__).parent / "logging_config.json"
+
+    logging_setup.configure(logging_config_file)
     if log_level is not None:
         root_logger = logging.getLogger('root')
         root_logger.setLevel(log_level)
