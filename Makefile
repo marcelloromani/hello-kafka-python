@@ -1,7 +1,17 @@
-.PHONY: venv
-venv:
-	python3 -m venv .venv
+.PHONY: test
+test:
+	uv run pytest
 
-.PHONY: requirements
-requirements:
-	pip install -r requirements.txt
+lint:
+	uv run ruff check src
+	uv run ruff check tests
+
+
+depcheck:
+	uv run deptry .
+
+ci: lint depcheck test
+	@echo "Executed ci tasks."
+
+build:
+	uv build
