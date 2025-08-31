@@ -26,3 +26,6 @@ dev = [
     "pytest-cov>=6.2.1",
     "ruff>=0.12.11",
 ]
+
+[tool.deptry]
+ignore = ["DEP001"]
