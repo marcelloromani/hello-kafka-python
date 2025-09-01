@@ -1,5 +1,7 @@
 # Python Kafka playground
 
+Trying Kafka in Python.
+
 ## Foreword
 
 How to install Kafka varies among operationg systems and is not the focus of this project.
