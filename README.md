@@ -65,101 +65,113 @@ Starting broker
 [2025-08-31 21:53:47,165] INFO Registered kafka:type=kafka.Log4jController MBean (kafka.utils.Log4jControllerRegistration$)
 ```
 
-## Scenario 1: topic with 1 partition
+# Topic with 1 partition
 
-### Create topic
-
+Create a topic with 1 partition
 ```shell
-$ /opt/homebrew/bin/kafka-topics kafka-config/broker.properties --bootstrap-server localhost:9092 --topic hello.world.1 --create --partitions 1
-WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
-Created topic hello.world.1.
+$ bin/kafka-create-topic.sh hello.world.1 1
 ```
 
-Describe the topic just to verify its metadata.
+## Consumers in the same group
 
+Messages are distributed among consumers in the same consumer group.
+
+* Spin up two consumers in the same consumer group
+* Each consumer writes the received messages in a text file
+* Each file doesn't receive all messages, but collectively they contain all sent messages.
+
+Consumers 1 and 2 in group1
 ```shell
-$ /opt/homebrew/bin/kafka-topics kafka-config/broker.properties --bootstrap-server localhost:9092 --topic hello.world.1 --describe
-Topic: hello.world.1	TopicId: O-388YCaQj-FhWHrtJRUuw	PartitionCount: 1	ReplicationFactor: 1	Configs:
-	Topic: hello.world.1	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr:
+$ uv run src/hello_kafka_python/main.py -c commit -t hello.world.1 -g "group1" -b 1000 -o consumer-1.txt
+$ uv run src/hello_kafka_python/main.py -c commit -t hello.world.1 -g "group1" -b 1000 -o consumer-2.txt
 ```
 
-### Single consumer
-
+Producer:
 ```shell
-$ uv run src/hello_kafka_python/main.py -c basic -t hello.world.1 -g "group1"
+$ uv run src/hello_kafka_python/main.py -p loop -t hello.world.1 -m "one partition" --count 100000
 ```
 
-#### Send a message to the topic
-
+Verify
 ```shell
-$ uv run src/hello_kafka_python/main.py -p basic -t hello.world.1 -m "Hello, Kafka"
+$ cat consumer-1.txt consumer-2.txt | sort -k4 -n | wc -l
 ```
 
-### Two consumers, same consumer group
+Result: `100000`
 
+## Consumers in different groups
+
+All consumer groups get all the messages.
+
+* Spin up two consumer in different consumer groups
+* Each consumer writes the received messages in a text file
+* Each file contains all messages
+
+Consumer 1 group1
 ```shell
-$ uv run src/hello_kafka_python/main.py -c basic -t hello.world.1 -g "group_1"
+$ uv run src/hello_kafka_python/main.py -c commit -t hello.world.1 -g "group1" -b 1000 -o consumer-1-g1.txt
 ```
 
+Consumer 1 group2
 ```shell
-$ uv run src/hello_kafka_python/main.py -c basic -t hello.world.1 -g "group_1"
+$ uv run src/hello_kafka_python/main.py -c commit -t hello.world.1 -g "group2" -b 1000 -o consumer-1-g2.txt
 ```
 
-### Send a message to the topic
-
+Verify
 ```shell
-$ uv run src/hello_kafka_python/main.py -p basic -t hello.world.1 -m "Hello, Kafka"
+$ cat consumer-1-g1.txt consumer-1-g2.txt| sort -k4 -n | wc -l
 ```
 
-## Two consumers, different consumer groups (fan-out == 2)
+Result: `200000`
 
-In one terminal, run:
+# Topic with 2 partitions
+
+The number of partitions affects the data distribution within the Kafka cluster,
+but the single group / multi group semantics are the same.
+
+Create a topic with 2 partitions
 ```shell
-$ uv run src/hello_kafka_python/main.py -c basic -t hello.world.1 -g "group_1"
+$ bin/kafka-create-topic.sh hello.world.2 2
 ```
 
-In another terminal, run:
+## Consumers in the same group
+
+Consumers 1 and 2 in group1
 ```shell
-$ uv run src/hello.world_python/main.py -c basic -t hello.world.1 -g "group_2"
+$ uv run src/hello_kafka_python/main.py -c commit -t hello.world.2 -g "group1" -b 1000 -o consumer-1.txt
+$ uv run src/hello_kafka_python/main.py -c commit -t hello.world.2 -g "group1" -b 1000 -o consumer-2.txt
 ```
 
-### Send a message to the topic
-
+Producer:
 ```shell
-$ uv run src/hello_kafka_python/main.py -p basic -t hello.world.1 -m "Hello, Kafka"
+$ uv run src/hello_kafka_python/main.py -p loop -t hello.world.2 -m "two partitions" --count 100000
 ```
 
-## Topic with 2 partitions
-
+Verify
 ```shell
-$ /opt/homebrew/bin/kafka-topics kafka-config/broker.properties --bootstrap-server localhost:9092 --topic hello.world.2 --create --partitions 2
+$ cat consumer-1.txt consumer-2.txt | sort -k4 -n | wc -l
 ```
 
-## Two consumers, same consumer group
+Result: `100000`
 
-In one terminal, run:
+## Consumers in different groups
+
+Consumer 1 group1
 ```shell
-$ uv run src/hello_kafka_python/main.py -c basic -t hello.world.2 -g "group_1"
+$ uv run src/hello_kafka_python/main.py -c commit -t hello.world.2 -g "group1" -b 1000 -o consumer-1-g1.txt
 ```
 
-In another terminal, run:
+Consumer 1 group2
 ```shell
-$ uv run src/hello_kafka_python/main.py -c basic -t hello.world_2 -g "group_1"
+$ uv run src/hello_kafka_python/main.py -c commit -t hello.world.2 -g "group2" -b 1000 -o consumer-1-g2.txt
 ```
 
-### Send messages to the topic
-
-Run this multiple times:
-
+Verify
 ```shell
-$ uv run src/hello_kafka_python/main.py -p basic -t hello.world.2 -m "Hello, Kafka"
+$ cat consumer-1-g1.txt consumer-1-g2.txt| sort -k4 -n | wc -l
 ```
 
-### Batch send
+Result: `200000`
 
-```shell
-$ uv run src/hello_kafka_python/main.py -p loop -t hello.world.2 --count 100000
-```
 
 # Kafka commands reference
 
