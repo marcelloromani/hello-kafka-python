@@ -167,7 +167,7 @@ $ uv run src/hello_kafka_python/main.py -c commit -t hello.world.2 -g "group2" -
 
 Verify
 ```shell
-$ cat consumer-1-g1.txt consumer-1-g2.txt| sort -k4 -n | wc -l
+$ cat consumer-1-g1.txt consumer-1-g2.txt | sort -k4 -n | wc -l
 ```
 
 Result: `200000`
