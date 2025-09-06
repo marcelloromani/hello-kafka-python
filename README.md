@@ -4,7 +4,7 @@ Trying Kafka in Python.
 
 ## Foreword
 
-How to install Kafka varies among operationg systems and is not the focus of this project.
+How to install Kafka varies among operating systems and is not the focus of this project.
 
 Instructions and scripts for Mac OS are provided out of convenience.
 
