@@ -38,7 +38,7 @@ class KafkaCommitConsumer(KafkaConsumer):
                 # Commit if we processed an entire batch of messages
                 if uncommitted_msgs >= self._batch_size:
                     self.logger.info("Committing %d messages >= batch size %d", uncommitted_msgs, self._batch_size)
-                    self._c.commit()
+                    self._c.commit(asynchronous=False)
                     uncommitted_msgs = 0
                     uncommitted_since = None
 
@@ -49,7 +49,7 @@ class KafkaCommitConsumer(KafkaConsumer):
                         self.logger.info("Committing %d messages after %d ms >= %d", uncommitted_msgs,
                                          uncommitted_age_ms,
                                          self._max_commit_interval_ms)
-                        self._c.commit()
+                        self._c.commit(asynchronous=False)
                         uncommitted_msgs = 0
                         uncommitted_since = None
 
