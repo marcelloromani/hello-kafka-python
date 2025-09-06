@@ -1,5 +1,4 @@
-import hashlib
-import time
+import secrets
 from typing import Optional
 
 from kafka_basic_producer import KafkaBasicProducer
@@ -18,7 +17,7 @@ class KafkaLoopProducer(KafkaBasicProducer):
 
     @staticmethod
     def _generate_obj_unique_id() -> str:
-        return hashlib.md5(str(time.time()).encode('utf-8')).hexdigest()[:8]
+        return secrets.token_hex(4)
 
     def send_messages(self, msg_count: int):
         for i in range(msg_count):
