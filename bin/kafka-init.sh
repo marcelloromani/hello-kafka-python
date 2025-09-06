@@ -18,7 +18,7 @@ cat kafka-storage/kafka_cluster_id.txt
 export KAFKA_CLUSTER_ID=$(cat kafka-storage/kafka_cluster_id.txt)
 
 echo "Initializing broker storage"
-/opt/homebrew/bin/kafka-storage format -t $KAFKA_CLUSTER_ID -c kafka-config/broker.properties
+/opt/homebrew/bin/kafka-storage format -t "${KAFKA_CLUSTER_ID}" -c kafka-config/broker.properties
 
 echo "Initializing controller storage"
-/opt/homebrew/bin/kafka-storage format -t $KAFKA_CLUSTER_ID --standalone -c kafka-config/controller.properties
+/opt/homebrew/bin/kafka-storage format -t "${KAFKA_CLUSTER_ID}" --standalone -c kafka-config/controller.properties
