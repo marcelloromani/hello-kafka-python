@@ -8,7 +8,7 @@ fi
 
 echo "Creating Kafka storage directories"
 mkdir "kafka-storage"
-mkdir "kafka-storage/broker1"
+mkdir "kafka-storage/broker"
 mkdir "kafka-storage/controller"
 
 echo "Generating Kafka cluster id"
