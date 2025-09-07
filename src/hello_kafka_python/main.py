@@ -93,7 +93,7 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
         p.send_messages(count)
 
     else:
-        logger.error("No action specified. Please use --help for options.")
+        logger.error("No consumer or producer option specified. Please use --help for information.")
 
 
 if __name__ == '__main__':
