@@ -39,7 +39,7 @@ def signal_handler(sig, frame):
         obj.shutdown()
 
 
-@click.command("kafka-consumer")
+@click.command("kafka-client")
 @click.option("-c", "--consumer-type", type=click.Choice(['basic', 'commit']),
               help="Type of Kafka consumer to run")
 @click.option("-b", "--batch-size", type=int, default=1,
