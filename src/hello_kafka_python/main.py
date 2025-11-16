@@ -6,12 +6,12 @@ from typing import Optional
 import click
 
 from hello_kafka_python.core import logging_setup
-from kafka_basic_consumer import KafkaBasicConsumer
-from kafka_basic_producer import KafkaBasicProducer
-from kafka_client import KafkaClient
-from kafka_commit_consumer import KafkaCommitConsumer
-from kafka_loop_producer import KafkaLoopProducer
-from msg_processors import PersistToTextFileMsgProcessor
+from hello_kafka_python.msg_processors import PersistToTextFileMsgProcessor
+from hello_kafka_python.kafka_basic_consumer import KafkaBasicConsumer
+from hello_kafka_python.kafka_basic_producer import KafkaBasicProducer
+from hello_kafka_python.kafka_client import KafkaClient
+from hello_kafka_python.kafka_commit_consumer import KafkaCommitConsumer
+from hello_kafka_python.kafka_loop_producer import KafkaLoopProducer
 
 GROUP_ID: str = "group.id"
 

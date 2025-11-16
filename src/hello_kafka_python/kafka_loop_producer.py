@@ -1,8 +1,8 @@
 import secrets
 from typing import Optional
 
-from kafka_basic_producer import KafkaBasicProducer
-from msg_processors import IMsgProcessor
+from hello_kafka_python.kafka_basic_producer import KafkaBasicProducer
+from hello_kafka_python.msg_processors import IMsgProcessor
 
 
 class KafkaLoopProducer(KafkaBasicProducer):

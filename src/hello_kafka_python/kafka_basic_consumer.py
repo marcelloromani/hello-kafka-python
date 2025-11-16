@@ -5,8 +5,8 @@ from typing import Optional
 from confluent_kafka import KafkaError
 from confluent_kafka import KafkaException
 
-from kafka_consumer import KafkaConsumer
-from msg_processors import IMsgProcessor
+from hello_kafka_python.kafka_consumer import KafkaConsumer
+from hello_kafka_python.msg_processors import IMsgProcessor
 
 
 class KafkaBasicConsumer(KafkaConsumer):

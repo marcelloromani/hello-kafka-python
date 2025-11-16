@@ -5,8 +5,8 @@ from typing import Optional
 from confluent_kafka import Consumer
 from confluent_kafka import Message
 
-from kafka_client import KafkaClient
-from msg_processors import IMsgProcessor
+from hello_kafka_python.kafka_client import KafkaClient
+from hello_kafka_python.msg_processors import IMsgProcessor
 
 
 class KafkaConsumer(KafkaClient):
