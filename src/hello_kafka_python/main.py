@@ -5,7 +5,7 @@ from typing import Optional
 
 import click
 
-import logging_setup
+from hello_kafka_python.core import logging_setup
 from kafka_basic_consumer import KafkaBasicConsumer
 from kafka_basic_producer import KafkaBasicProducer
 from kafka_client import KafkaClient
