@@ -42,10 +42,12 @@ class PersistToTextFileMsgProcessor(IMsgProcessor):
     def __exit__(self, exc_type, exc_value, traceback):
         self._fd.close()
 
-    def post_receive_hook(self, payload: str):
+    def _write_payload(self, payload: str) -> None:
         self._fd.write(payload)
         self._fd.write("\n")
 
+    def post_receive_hook(self, payload: str):
+        self._write_payload(payload)
+
     def post_send_hook(self, payload: str):
-        self._fd.write(payload)
-        self._fd.write("\n")
+        self._write_payload(payload)
