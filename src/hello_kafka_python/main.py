@@ -86,6 +86,7 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
     elif producer_type == 'basic':
         logger.info(f"Starting producer type={producer_type} topic={topic_name}")
         p = KafkaBasicProducer(producer_conf, topic_name, message_processor)
+        register_client(p)
         p.send(message)
 
     elif producer_type == 'loop':
