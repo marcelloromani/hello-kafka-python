@@ -67,7 +67,7 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
     # saves messages to file
     message_processor = None
     if output_file is not None:
-        message_processor = PersistToTextFileMsgProcessor(output_file)
+        message_processor = PersistToTextFileMsgProcessor(Path(output_file))
 
     if consumer_type == 'basic':
         logger.info(f"Starting consumer type={consumer_type} topic={topic_name}, consumer_group={consumer_group}")

@@ -1,7 +1,8 @@
 import logging
+from abc import ABC
+from pathlib import Path
 
-
-class IMsgProcessor:
+class IMsgProcessor(ABC):
 
     def pre_send_hook(self, payload: str):
         """
@@ -31,7 +32,7 @@ class PersistToTextFileMsgProcessor(IMsgProcessor):
     """
     logger = logging.getLogger()
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: Path):
         self._filename = filename
         self.logger.info("Opening file %s in append mode", self._filename)
         self._fd = open(self._filename, "a")
