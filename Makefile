@@ -2,9 +2,11 @@
 test:
 	uv run pytest
 
+test-report:
+	open htmlcov/index.html
+
 lint:
 	uv run ruff check .
-
 
 depcheck:
 	uv run deptry .
