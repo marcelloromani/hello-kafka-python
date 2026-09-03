@@ -78,7 +78,7 @@ Messages are distributed among consumers in the same consumer group.
 
 * Spin up two consumers in the same consumer group
 * Each consumer writes the received messages in a text file
-* Each file doesn't receive all messages, but collectively they contain all sent messages.
+* One consumer receives all the messages.
 
 Consumers 1 and 2 in group1
 ```shell
@@ -91,7 +91,17 @@ Producer:
 $ uv run src/hello_kafka_python/main.py -p loop -t hello.world.1 -m "one partition" --count 100000
 ```
 
-Verify
+Verify: once consumer gets all messages
+
+```shell
+$ wc -l consumer-1.txt
+       0 consumer-1.txt
+$ wc -l consumer-2.txt
+  100000 consumer-2.txt
+```
+
+
+Verify: total messages
 ```shell
 $ cat consumer-1.txt consumer-2.txt | sort -k4 -n | wc -l
 ```
@@ -146,7 +156,16 @@ Producer:
 $ uv run src/hello_kafka_python/main.py -p loop -t hello.world.2 -m "two partitions" --count 100000
 ```
 
-Verify
+Verify: both consumers get a share of the messages
+
+```shell
+$ wc -l consumer-1.txt
+   50084 consumer-1.txt
+$ wc -l consumer-2.txt
+   49916 consumer-2.txt
+```
+
+Verify: total messages
 ```shell
 $ cat consumer-1.txt consumer-2.txt | sort -k4 -n | wc -l
 ```
