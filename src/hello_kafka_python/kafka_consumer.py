@@ -10,7 +10,7 @@ from hello_kafka_python.msg_processors import IMsgProcessor
 
 
 class KafkaConsumer(KafkaClient):
-    logger = logging.getLogger()
+    logger = logging.getLogger('KafkaConsumer')
 
     def __init__(self, configuration: dict, topic_name: str, msg_processor: Optional[IMsgProcessor]):
         super().__init__()

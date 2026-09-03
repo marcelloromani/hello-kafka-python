@@ -33,7 +33,7 @@ def register_client(obj: KafkaClient):
 
 
 def signal_handler(sig, frame):
-    logger = logging.getLogger()
+    logger = logging.getLogger('signal_handler')
     logger.info('You pressed Ctrl+C!')
     for obj in _kafka_clients:
         obj.shutdown()
@@ -60,7 +60,7 @@ def main(consumer_type: str, consumer_group: str, producer_type: str, topic_name
         root_logger = logging.getLogger('root')
         root_logger.setLevel(log_level)
 
-    logger = logging.getLogger()
+    logger = logging.getLogger('main')
 
     # saves messages to file
     message_processor = None

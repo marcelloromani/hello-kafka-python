@@ -2,7 +2,7 @@ import logging
 
 
 class KafkaClient:
-    logger = logging.getLogger()
+    logger = logging.getLogger('KafkaClient')
 
     def __init__(self):
         self._shutdown = False

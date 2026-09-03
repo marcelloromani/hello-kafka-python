@@ -30,7 +30,7 @@ class PersistToTextFileMsgProcessor(IMsgProcessor):
     """
     Appends sent and received payloads to a text file.
     """
-    logger = logging.getLogger()
+    logger = logging.getLogger('PersistToTextFileMsgProcessor')
 
     def __init__(self, filename: Path):
         self._filename = filename

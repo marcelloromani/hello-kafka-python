@@ -13,7 +13,7 @@ class KafkaBasicProducer(KafkaClient):
     Flushes after every send.
     """
 
-    logger = logging.getLogger()
+    logger = logging.getLogger('KafkaBasicProducer')
 
     def __init__(self, configuration: dict, topic_name: str, msg_processor: Optional[IMsgProcessor]):
         super().__init__()

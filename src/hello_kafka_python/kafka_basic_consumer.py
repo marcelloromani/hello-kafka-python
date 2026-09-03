@@ -14,7 +14,7 @@ class KafkaBasicConsumer(KafkaConsumer):
     Subscribes to a topic and prints messages as strings.
     """
 
-    logger = logging.getLogger()
+    logger = logging.getLogger('KafkaBasicConsumer')
 
     def __init__(self, configuration: dict, topic_name: str, msg_processor: Optional[IMsgProcessor]):
         super().__init__(configuration, topic_name, msg_processor)

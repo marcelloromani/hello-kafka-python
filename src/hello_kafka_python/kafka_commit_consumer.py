@@ -16,7 +16,7 @@ class KafkaCommitConsumer(KafkaConsumer):
     Commits every batch_size messages or every _max_commit_interval_ms (hardcoded to 5000ms).
     """
 
-    logger = logging.getLogger()
+    logger = logging.getLogger('KafkaCommitConsumer')
 
     def __init__(self, configuration: dict, topic_name: str, batch_size: int, msg_processor: Optional[IMsgProcessor]):
         configuration['enable.auto.commit'] = False
