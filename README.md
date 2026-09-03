@@ -94,7 +94,7 @@ Producer:
 $ uv run src/hello_kafka_python/main.py -p loop -t hello.world.1 -m "one partition" --count 100000
 ```
 
-Verify: once consumer gets all messages
+Verify: one consumer gets all messages
 
 ```shell
 $ wc -l consumer-1.txt
