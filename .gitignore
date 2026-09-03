@@ -177,3 +177,5 @@ cython_debug/
 .idea
 
 kafka-storage/
+
+.DS_Store
